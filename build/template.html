@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0A0C12">
+<title>Mochi's Court</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A0C12; --panel:#10131D; --text:#E6E8F2; --dim:#7E8497; --green:#34D399; --danger:#FB7185;
+  --gold:#FBBF24; --violet:#A78BFA; --cyan:#56C8EE;
+  --line:#2A3042; --shade:#05070B;
+  --fs:clamp(18px,4.7vw,20px);
+  --mono:"JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0}
+[hidden]{display:none!important}
+html,body{height:100%;overflow:hidden}
+body{
+  background:var(--bg);
+  background-image:linear-gradient(rgba(86,200,238,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(86,200,238,.05) 1px,transparent 1px);
+  background-size:50px 50px;
+  color:var(--text);font-family:var(--mono);font-size:var(--fs);line-height:1.35;
+  -webkit-tap-highlight-color:transparent;
+}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;
+  padding:max(8px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(6px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));
+  max-width:760px;margin:0 auto;}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+h1,h2,h3{font-weight:800;letter-spacing:-.02em}
+
+/* top bar */
+#top{display:flex;align-items:center;gap:10px;min-height:44px;flex:none}
+#top .logo{width:30px;height:30px;flex:none;display:block}
+#top .logo svg,#top .logo img{width:100%;height:100%;display:block;object-fit:contain}
+#top .brand{font-weight:800;font-size:.8em;color:var(--dim);letter-spacing:.08em}
+#top .sp{flex:1}
+.chip{display:inline-flex;align-items:center;gap:6px;border:3px solid var(--line);background:var(--panel);padding:2px 8px;font-weight:800;font-size:.85em;min-height:36px;white-space:nowrap}
+.chip.gen{border-color:var(--gold);color:var(--gold)}
+.coin{width:22px;height:22px;border-radius:50%;display:inline-grid;place-items:center;flex:none;
+  background:radial-gradient(circle at 35% 30%,#FDE68A,#FBBF24 55%,#B7791F);border:2px solid #92610E;box-shadow:inset 0 0 0 2px #FDE68A66}
+.coin .in{width:60%;height:60%;display:block;border-radius:50%;background:#7A4F08;display:grid;place-items:center}
+.coin .in svg,.coin .in img{width:70%;height:70%;display:block}
+.coin.big{width:56px;height:56px}
+#snd{min-height:36px;min-width:36px;border:3px solid var(--line);background:var(--panel);font-weight:800;font-size:.8em;padding:0 8px}
+#snd[aria-pressed="true"]{border-color:var(--green);color:var(--green)}
+
+#stage{flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
+.screen{flex:1;min-height:0;display:flex;flex-direction:column;animation:slide .35s ease-out}
+@keyframes slide{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
+footer{flex:none;text-align:center;color:var(--dim);font-size:12px;padding:4px 0 0}
+
+.card{background:var(--panel);border:3px solid var(--line);box-shadow:8px 8px 0 var(--shade);padding:10px 12px}
+.card.a{border-color:var(--cyan);box-shadow:8px 8px 0 #0E3342}
+.card.b{border-color:var(--violet);box-shadow:8px 8px 0 #2A2347}
+.card h3{font-size:.7em;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+.card.a h3{color:var(--cyan)} .card.b h3{color:var(--violet)}
+.btn{min-height:56px;padding:8px 16px;font-weight:800;border:3px solid var(--green);background:var(--green);color:#04130C;box-shadow:5px 5px 0 #0B5B40;transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translate(4px,4px);box-shadow:1px 1px 0 #0B5B40}
+.btn.ghost{background:var(--panel);color:var(--text);border-color:var(--line);box-shadow:5px 5px 0 var(--shade)}
+.btn.a{background:var(--cyan);border-color:var(--cyan);color:#04141C;box-shadow:5px 5px 0 #0E3342}
+.btn.b{background:var(--violet);border-color:var(--violet);color:#120A2A;box-shadow:5px 5px 0 #2A2347}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:#241800;box-shadow:5px 5px 0 #6B4E08}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+
+/* title */
+.title{align-items:center;text-align:center;justify-content:center;gap:10px;overflow:auto}
+.title .mochi{height:clamp(150px,30vh,300px);width:auto;max-width:80%;object-fit:contain;animation:float 3.2s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-8px)}}
+.title h1{font-size:clamp(30px,9vw,48px);line-height:1}
+.title h1 span{color:var(--green)}
+.pitch{max-width:30ch}
+.fine{color:var(--dim);font-size:.72em}
+.link{background:none;border:0;color:var(--cyan);text-decoration:underline;min-height:44px;font-weight:700;font-size:.85em}
+.how{text-align:left;font-size:.78em;max-width:46ch}
+.how li{margin:4px 0 4px 18px}
+.row{display:flex;gap:12px;width:100%;justify-content:center}
+
+/* tutorial */
+.tut{align-items:center;justify-content:center;gap:14px;text-align:center}
+.tut img{height:clamp(110px,24vh,200px);width:auto}
+.tut .card{max-width:40ch}
+.dots{display:flex;gap:8px;justify-content:center}
+.dots i{width:14px;height:14px;border:3px solid var(--dim)}
+.dots i.on{background:var(--green);border-color:var(--green)}
+
+/* case */
+.case{gap:8px;position:relative}
+.timer{display:flex;align-items:center;gap:8px;flex:none}
+.timer .bar{flex:1;height:12px;border:3px solid var(--line);background:var(--panel)}
+.timer .bar i{display:block;height:100%;background:var(--green);width:100%}
+.timer.low .bar i{background:var(--danger)}
+.timer b{min-width:3.2ch;text-align:right;font-size:.85em}
+.timer.low b::after{content:" !"}
+.ctitle{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ctitle h2{font-size:1.1em}
+.tag{font-size:.62em;font-weight:800;border:2px solid var(--gold);color:var(--gold);padding:0 6px;letter-spacing:.06em;text-transform:uppercase}
+.deal{color:var(--dim);font-size:.9em}
+.claims{display:grid;gap:10px;grid-template-columns:1fr}
+.claims .card{padding:8px 12px}
+.claims p,.evid p{font-size:.88em}
+.evid{border:3px dashed var(--gold);padding:6px 10px;background:#fbbf2410}
+.evid b{color:var(--gold);font-size:.7em;letter-spacing:.1em;text-transform:uppercase;display:block}
+.votes{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:none;margin-top:auto}
+.votes .btn{padding:6px 8px;font-size:.92em}
+.votes .btn small{display:block;font-size:.6em;opacity:.75;font-weight:700}
+.jury{display:flex;justify-content:space-around;gap:6px;flex:none;padding-top:2px}
+.val{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.6em;color:var(--dim);font-weight:700;min-width:70px;text-align:center}
+.val svg{width:36px;height:36px}
+.lamp{display:grid;place-items:center;width:30px;height:30px;border:3px solid var(--line);background:var(--bg);font-weight:800;font-size:15px;color:var(--dim)}
+.lamp.on{animation:pop .3s ease-out}
+.lamp.on.A{background:var(--cyan);border-color:var(--cyan);color:#04141C;box-shadow:0 0 14px var(--cyan)}
+.lamp.on.B{background:var(--violet);border-color:var(--violet);color:#120A2A;box-shadow:0 0 14px var(--violet)}
+.lamp.you{border-style:dashed}
+@keyframes pop{from{transform:scale(.4)}60%{transform:scale(1.25)}to{transform:scale(1)}}
+
+/* verdict sheet */
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:100%;overflow:auto;z-index:5;background:var(--panel);border:3px solid var(--green);box-shadow:8px 8px 0 #0B5B40;padding:10px 12px;display:flex;flex-direction:column;gap:8px;animation:rise .3s ease-out}
+.sheet.bad{border-color:var(--danger);box-shadow:8px 8px 0 #5B1B27}
+@keyframes rise{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.vhead{display:flex;gap:10px;align-items:center}
+.vhead img{width:clamp(64px,16vh,110px);height:auto;flex:none}
+.banner{font-weight:800;font-size:1.05em;letter-spacing:.06em}
+.sheet .banner span{color:var(--green)}
+.sheet.bad .banner span{color:var(--danger)}
+.res{font-size:.88em;font-weight:700}
+.why{font-size:.82em;color:var(--dim)}
+.tally{font-size:.82em;color:var(--text)}
+.note{font-size:.7em;color:var(--dim)}
+.sheet .row{gap:10px}
+.sheet .btn{flex:1}
+.appealrow{display:flex;justify-content:space-around;gap:6px}
+.shake{animation:shake .45s}
+@keyframes shake{20%{transform:translate(-7px,3px)}40%{transform:translate(6px,-3px)}60%{transform:translate(-4px,2px)}80%{transform:translate(3px,-1px)}}
+.fall{position:fixed;top:-40px;z-index:30;pointer-events:none;animation:fall 1.6s ease-in forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+
+/* end */
+.end{align-items:center;text-align:center;justify-content:center;gap:10px;overflow:auto}
+.end img{height:clamp(100px,22vh,190px);width:auto}
+.rank{font-size:1.3em;color:var(--gold);font-weight:800}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;max-width:520px}
+.stats .card{padding:6px 4px}
+.stats b{display:block;font-size:1.25em}
+.stats span{font-size:.6em;color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+.copybox{width:100%;max-width:520px;background:var(--bg);color:var(--text);border:3px solid var(--cyan);font:inherit;font-size:.7em;padding:6px}
+
+/* demo cursor */
+#cursor{position:fixed;left:0;top:0;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;border:3px solid #fff;background:#ffffff55;z-index:99;pointer-events:none;transition:transform .45s cubic-bezier(.3,.7,.3,1);transform:translate(-100px,-100px);display:none}
+#cursor.tap{animation:tap .35s}
+@keyframes tap{50%{background:#34D399;scale:.7}}
+.ripple{position:fixed;width:20px;height:20px;margin:-10px;border:3px solid var(--green);border-radius:50%;z-index:98;pointer-events:none;animation:rip .6s ease-out forwards}
+@keyframes rip{to{transform:scale(4);opacity:0}}
+
+@media (max-width:520px){
+  #top{gap:6px}
+  #top .brand{display:none}
+  #top .sp{display:none}
+  #top .chip{padding:2px 6px}
+  #caseChip{margin-left:auto}
+}
+@media (min-width:700px){
+  .claims{grid-template-columns:1fr 1fr}
+  .votes .btn{font-size:1em}
+}
+@media (max-height:700px){
+  .title .mochi{height:22vh}
+  .claims p,.evid p{font-size:.82em}
+  .val svg{width:28px;height:28px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="top">
+    <span class="logo" id="logo" aria-label="GenLayer"></span>
+    <span class="brand">GenLayer</span>
+    <span class="sp"></span>
+    <span class="chip" id="caseChip" aria-label="Case number" hidden>CASE <b id="caseNum">0/8</b></span>
+    <span class="chip gen" aria-live="polite"><span class="coin" id="hudCoin"></span><b id="gen" aria-label="GEN balance">0</b> GEN</span>
+    <button id="snd" aria-pressed="false" aria-label="Toggle sound, currently off">SND OFF</button>
+  </header>
+  <main id="stage"></main>
+  <footer>Educational simulation, not financial advice. GEN here is play money.</footer>
+</div>
+<div id="cursor"></div>
+
+<script>
+/*ASSETS*/
+
+/* ============ CASE DATA (edit me) ============
+ validators: votes of Model Alpha, Beta, Gamma ("A" or "B")
+ appealVotes: the three extra validators' votes if the player appeals (3 + 3 + player = 7 votes)
+ Tie rule (game rule): if player + 3 validators tie 2-2, the validators' earlier majority stands. */
+const CASES = [
+ {id:1,title:"The 09:00 Delivery",deal:"Agent Pine agreed to deliver a weather dataset to Agent Reed by 09:00.",
+  claimA:"It arrived at 11:40. The contract says late delivery voids the fee.",
+  claimB:"The data is complete and accurate, so the fee is owed.",
+  evidence:"Contract: \"Delivery after 09:00 voids the full fee.\" Log: delivered 11:40.",
+  validators:["A","A","A"],explanation:"The cutoff is written in the contract and the log shows it was missed.",appealVotes:["A","A","A"]},
+ {id:2,title:"Style or Substance",deal:"Agent Lark translated a 40-page manual for Agent Moss, with a 95% accuracy target.",
+  claimA:"The translation is full of errors. I want a refund.",
+  claimB:"Every page was delivered. Moss just dislikes my style.",
+  evidence:"An independent check scored the translation at 71% accuracy.",
+  validators:["A","A","A"],explanation:"71% is far below the agreed 95%, so this is a quality failure, not taste.",appealVotes:["A","A","A"]},
+ {id:3,title:"Sold Twice",deal:"Agent Wren sold an exclusive dataset to Agent Hale, then sold it again to Agent Cobb.",
+  claimA:"Exclusive means exclusive. The second sale breaks our deal.",
+  claimB:"I never promised not to resell after delivery.",
+  evidence:"Contract: \"Exclusive rights for 12 months.\" Sales log: second sale in month 3.",
+  validators:["A","A","A"],explanation:"The second sale happened well inside the 12-month exclusive window.",appealVotes:["A","A","A"]},
+ {id:4,title:"The Crashed Job",deal:"Agent Orca was paid to label 1,000 images but crashed after 100.",
+  claimA:"Refund the 900 labels I never received.",
+  claimB:"I only owe a small credit, not cash.",
+  evidence:"Terms: \"Unfinished work is refunded in proportion.\" Progress log: 100 of 1,000.",
+  validators:["A","A","A"],explanation:"The terms call for a proportional refund, not a credit.",appealVotes:["A","A","A"]},
+ {id:5,title:"One Hour Late",deal:"Agent Finch had to deliver a report by 18:00 and delivered at 19:00.",
+  claimA:"One hour late is late. Cancel the contract.",
+  claimB:"The contract gives a two-hour grace period.",
+  evidence:"Contract: \"Deliveries up to two hours after the deadline are accepted.\"",
+  validators:["B","B","B"],explanation:"The delivery landed inside the written grace period.",appealVotes:["B","B","B"]},
+ {id:6,title:"Uptime Promise",deal:"Agent Vale promised 99% monthly uptime for its API service.",
+  claimA:"There was a 3-hour outage. That breaks the promise.",
+  claimB:"One 3-hour outage in a 30-day month is still above 99%.",
+  evidence:"30 days = 720 hours. 99% uptime allows 7.2 hours of downtime. Logged: 3 hours.",
+  validators:["B","B","B"],explanation:"3 hours of downtime is under the 7.2 hours the promise allows.",appealVotes:["B","B","B"]},
+ {id:7,title:"Quality Threshold",deal:"Agent Ash must deliver a classifier with at least 90% accuracy.",
+  claimA:"84% is close enough. Pay me in full.",
+  claimB:"The deal says at least 90%. I will not pay full price.",
+  evidence:"Contract: \"Minimum 90% accuracy on the shared test set.\" Result: 84%.",
+  validators:["B","B","B"],explanation:"The threshold is a minimum, and 84% does not reach it.",appealVotes:["B","B","B"]},
+ {id:8,title:"Pay First",deal:"Agent Nox built a tool for Agent Rue, who paid only a 40% deposit.",
+  claimA:"I paid something, so release the full tool.",
+  claimB:"Files are released only after full payment.",
+  evidence:"Contract: \"Final files released after 100% payment.\" Payments logged: 40%.",
+  validators:["B","B","B"],explanation:"Release was tied to full payment, which has not happened.",appealVotes:["B","B","B"]},
+ {id:9,title:"Billed Twice",deal:"Agent Bram charged Agent Sol twice for the same analysis job.",
+  claimA:"Job #482 appears twice on the invoice. Refund one.",
+  claimB:"Two invoices means two jobs.",
+  evidence:"Ledger: two charges, both tagged Job #482, identical result hash.",
+  validators:["A","A","A"],explanation:"Same job ID and same result: one job, charged twice.",appealVotes:["A","A","A"]},
+ {id:10,title:"Endless Revisions",deal:"Agent Kite agreed to two free logo revisions for Agent Mara.",
+  claimA:"I want five more revisions at no cost.",
+  claimB:"Two were included. More cost extra.",
+  evidence:"Contract: \"Two free revisions. Extra revisions are charged.\" Used so far: 2.",
+  validators:["B","B","B"],explanation:"The free revisions are used up, and extras are billable.",appealVotes:["B","B","B"]},
+ {id:11,title:"Missing Sources",deal:"Agent Pike was hired to write a summary with a cited source for each claim.",
+  claimA:"There are zero citations. The job is incomplete.",
+  claimB:"The summary is accurate, so citations are optional.",
+  evidence:"Brief: \"Every claim needs a cited source.\" Delivered summary: 0 citations.",
+  validators:["A","A","A"],explanation:"Citations were an explicit requirement, not an extra.",appealVotes:["A","A","A"]},
+ {id:12,title:"Early Cancellation",deal:"Agent Fern cancelled an order 6 hours after placing it, before work began.",
+  claimA:"Cancelling within 24 hours is free, so no fee.",
+  claimB:"A cancellation fee applies to every cancelled job.",
+  evidence:"Terms: \"Cancel within 24 hours, before work starts, for no fee.\" Work started: never.",
+  validators:["A","A","A"],explanation:"Both conditions of the free-cancellation rule were met.",appealVotes:["A","A","A"]},
+ {id:13,title:"Wrong Format",deal:"Agent Lumen was asked for a CSV file and sent photos of printed tables.",
+  claimA:"I need a CSV. Photos are unusable for my pipeline.",
+  claimB:"The numbers are all there, so I delivered.",
+  evidence:"Order: \"Format: CSV only.\" Delivered: 12 image files.",
+  validators:["A","A","A"],explanation:"The format was specified, and images are not a CSV.",appealVotes:["A","A","A"]},
+ {id:14,title:"Better Substitute",deal:"Agent Dove replaced a data source for Agent Ivy without asking first.",
+  claimA:"You swapped sources without asking. That breaks our deal.",
+  claimB:"The deal allows equal or better substitutes, and this one is better.",
+  evidence:"Contract: \"Equal or better substitutes are permitted.\" Quality score: old 82, new 91.",
+  validators:["B","B","B"],explanation:"The contract permits better substitutes, and the score shows it is better.",appealVotes:["B","B","B"]},
+ {id:15,title:"Five Days",deal:"Agent Roan promised delivery \"within 5 days\" to Agent Tess, starting on a Thursday.",
+  claimA:"It came on day 6 if you count weekends. Too late.",
+  claimB:"Past deals counted business days. It came on business day 4.",
+  evidence:"Contract says \"5 days\" with no definition. Two earlier deals used business days.",
+  validators:["B","B","A"],explanation:"Prior practice points to business days, but the missing definition made it close.",appealVotes:["B","A","B"]},
+ {id:16,title:"How Many Records",deal:"Agent Sage promised \"at least 1,000 records\" to Agent Ode.",
+  claimA:"Only 960 are unique. Records should mean unique ones.",
+  claimB:"I delivered 1,000 rows, exactly as promised.",
+  evidence:"File: 1,000 rows, 40 of them exact duplicates. The contract does not define \"record\".",
+  validators:["A","A","B"],explanation:"Duplicates add no value, so most validators read \"records\" as unique ones.",appealVotes:["A","B","A"]},
+ {id:17,title:"Reasonable Effort",deal:"Agent Cleo promised \"reasonable effort\" to fix a bug for Agent Rho.",
+  claimA:"Cleo tried twice and quit. That is not reasonable.",
+  claimB:"Two attempts took a full day. That is reasonable.",
+  evidence:"Contract: \"Reasonable effort, no result guaranteed.\" Log: 2 attempts over 1 day.",
+  validators:["B","A","B"],explanation:"No result was guaranteed and real effort is logged, though some validators wanted more tries.",appealVotes:["B","B","A"]},
+ {id:18,title:"When Does the Clock Start",deal:"Agent Zed promised to answer support tickets \"within one hour\".",
+  claimA:"The clock starts when I send the ticket. Zed took 90 minutes.",
+  claimB:"The clock starts at acknowledgement. I answered in 40 minutes.",
+  evidence:"SLA text: \"within one hour\" only. Sent 10:00, acknowledged 10:50, answered 11:30.",
+  validators:["A","A","B"],explanation:"With no stated start, most validators counted from when the ticket was sent.",appealVotes:["A","A","B"]},
+ {id:19,title:"Exclusive Window",deal:"Agent Ume granted Agent Bay \"exclusive rights for 30 days\", then sold to Agent Cyd on day 35.",
+  claimA:"Exclusivity began at delivery on day 10, so it ran to day 40.",
+  claimB:"The 30 days ran from signing and ended on day 30.",
+  evidence:"Signed day 0. Delivered day 10. Clause does not say when the 30 days begin.",
+  validators:["A","A","B"],explanation:"The larger panel favored signing, the usual start for contract terms. The first three leaned the other way.",appealVotes:["B","B","A"]},
+ {id:20,title:"Two Meanings",deal:"Agent Opal offered \"up to 3 revisions within 48 hours\" to Agent Vex.",
+  claimA:"Three revisions, each returned within 48 hours of my request.",
+  claimB:"All three must be done within 48 hours total, then it ends.",
+  evidence:"Vex asked for the 3rd revision at hour 60. The clause has no further detail.",
+  validators:["B","B","A"],explanation:"The larger panel read 48 hours as turnaround per revision, the common service wording.",appealVotes:["A","A","B"]}
+];
+
+/* ============ helpers ============ */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const q=new URLSearchParams(location.search);
+const DEMO=q.get('demo')==='1';
+const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const rand=q.get('seed')?rng(+q.get('seed')):Math.random;
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(rand()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const TOTAL=DEMO?3:8, START_GEN=2, TIME=15;
+const MODELS=["Model Alpha","Model Beta","Model Gamma"], APPEAL_MODELS=["Model Delta","Model Epsilon","Model Zeta"];
+const LAMP_MS=DEMO?380:650, REDUCED_MS=250;
+
+function logoHTML(){return ASSETS.logoKind==='png'?`<img src="${ASSETS.logo}" alt="">`:ASSETS.logo}
+function coinHTML(big){return `<span class="coin${big?' big':''}" aria-hidden="true"><span class="in">${logoHTML()}</span></span>`}
+const ROBOT=c=>`<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="19" y="3" width="2" height="7" fill="${c}"/><rect x="16" y="1" width="8" height="4" fill="${c}"/><rect x="6" y="10" width="28" height="22" fill="#10131D" stroke="${c}" stroke-width="3"/><rect x="12" y="17" width="6" height="6" fill="${c}"/><rect x="22" y="17" width="6" height="6" fill="${c}"/><rect x="14" y="27" width="12" height="2" fill="${c}"/><rect x="2" y="16" width="3" height="10" fill="${c}"/><rect x="35" y="16" width="3" height="10" fill="${c}"/></svg>`;
+const ROBOT_COLORS=["#56C8EE","#A78BFA","#FBBF24","#34D399","#FB7185","#E6E8F2"];
+
+/* ============ sound (off until toggled) ============ */
+let soundOn=false, actx=null;
+function beep(f,d=.1,type='square',v=.05,when=0){
+  if(!soundOn)return;
+  try{
+    actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==='suspended')actx.resume();
+    const t=actx.currentTime+when,o=actx.createOscillator(),g=actx.createGain();
+    o.type=type;o.frequency.value=f;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+    o.connect(g).connect(actx.destination);o.start(t);o.stop(t+d+.02);
+  }catch(e){}
+}
+const SFX={vote:()=>beep(440,.08),lamp:()=>beep(700,.07,'triangle'),
+  win:()=>[523,659,784,1047].forEach((f,i)=>beep(f,.14,'square',.05,i*.1)),
+  lose:()=>[330,262,196].forEach((f,i)=>beep(f,.18,'sawtooth',.04,i*.13))};
+$('#snd').onclick=()=>{
+  soundOn=!soundOn;const b=$('#snd');
+  b.textContent=soundOn?'SND ON':'SND OFF';b.setAttribute('aria-pressed',soundOn);
+  b.setAttribute('aria-label','Toggle sound, currently '+(soundOn?'on':'off'));
+  SFX.vote();
+};
+
+/* ============ state ============ */
+let S;
+const stage=$('#stage');
+function newRun(){
+  const pool=DEMO?[1,15,19].map(id=>CASES.find(c=>c.id===id)):shuffle(CASES).slice(0,TOTAL);
+  S={cases:pool,i:0,gen:START_GEN,streak:0,longest:0,hits:0,results:[],appealUsed:false,
+     phase:'idle',vote:null,timer:null,t0:0,busy:false,cur:null};
+  hud();
+}
+function hud(){
+  $('#gen').textContent=S?S.gen:START_GEN;
+  const chip=$('#caseChip');
+  if(S&&S.phase!=='idle'&&S.phase!=='title'){chip.hidden=false;$('#caseNum').textContent=Math.min(S.i+1,TOTAL)+'/'+TOTAL}else chip.hidden=true;
+}
+function setScreen(html,cls){
+  stage.innerHTML=`<section class="screen ${cls}">${html}</section>`;
+  return stage.firstElementChild;
+}
+const mult=s=>s>=5?3:s>=3?2:1;
+function loadBest(){try{return JSON.parse(localStorage.getItem('mochi.best'))}catch(e){return null}}
+function saveBest(v){try{localStorage.setItem('mochi.best',JSON.stringify(v))}catch(e){}}
+
+/* ============ title / tutorial ============ */
+function title(){
+  S={gen:START_GEN,phase:'title'};hud();clearInterval(S.timer);
+  const best=loadBest();
+  setScreen(`
+    <img class="mochi" src="${ASSETS.mochi}" alt="Mochi, the GenLayer mascot">
+    <h1>Mochi's <span>Court</span></h1>
+    <p class="pitch">AI agents make deals. Some end in disputes. You are the jury.</p>
+    <p class="fine">GEN in this game is play money. Nothing here is real.${best?` Best: ${best.gen} GEN, ${esc(best.rank)}.`:''}</p>
+    <div class="row"><button class="btn" id="startBtn" aria-label="Start the game">START</button></div>
+    <button class="link" id="howBtn" aria-expanded="false" aria-controls="how">How it works</button>
+    <ul class="how card" id="how" hidden>
+      <li>You act as one validator on a jury of four.</li>
+      <li>On GenLayer, validators run different AI models and reach agreement by consensus (Optimistic Democracy).</li>
+      <li>A disputed verdict can be appealed, which brings in more validators.</li>
+      <li>GEN is the network token. In this game it is only play money.</li>
+    </ul>`,'title');
+  $('#startBtn').onclick=()=>DEMO?startRun():tutorial(0);
+  $('#howBtn').onclick=e=>{const h=$('#how');h.hidden=!h.hidden;e.target.setAttribute('aria-expanded',!h.hidden)};
+}
+const TUT=[
+ ["1. Read the case","Two AI agents made a deal and now they disagree. Read each claim and the evidence."],
+ ["2. Cast your vote","Side with A or B within 15 seconds. Three validators, each a different AI model, vote too."],
+ ["3. Match the majority","If you match the majority of the jury you earn GEN. Streaks multiply your reward. One appeal per run."]];
+function tutorial(n){
+  S.phase='tutorial';
+  setScreen(`
+    <img src="${ASSETS.idea}" alt="Mochi with an idea">
+    <div class="card"><h2>${TUT[n][0]}</h2><p style="margin-top:6px">${TUT[n][1]}</p></div>
+    <div class="dots" aria-hidden="true">${TUT.map((_,i)=>`<i class="${i===n?'on':''}"></i>`).join('')}</div>
+    <div class="row"><button class="btn ghost" id="skip">SKIP</button><button class="btn" id="next">${n<2?'NEXT':'PLAY'}</button></div>`,'tut');
+  $('#skip').onclick=startRun;
+  $('#next').onclick=()=>n<2?tutorial(n+1):startRun();
+}
+
+/* ============ run ============ */
+function startRun(){newRun();showCase()}
+function showCase(){
+  const c=S.cases[S.i];S.cur=c;S.vote=null;S.phase='voting';S.busy=false;S.appealed=false;hud();
+  const split=!c.validators.every(v=>v===c.validators[0]);
+  setScreen(`
+    <div class="timer" id="timer" ${DEMO?'hidden':''}><div class="bar" role="progressbar" aria-label="Time left" aria-valuemin="0" aria-valuemax="${TIME}"><i></i></div><b>${TIME}s</b></div>
+    <div class="ctitle"><h2>${esc(c.title)}</h2></div>
+    <p class="deal">${esc(c.deal)}</p>
+    <div class="claims">
+      <article class="card a"><h3>Agent A says</h3><p>${esc(c.claimA)}</p></article>
+      <article class="card b"><h3>Agent B says</h3><p>${esc(c.claimB)}</p></article>
+    </div>
+    <div class="evid"><b>Evidence</b><p>${esc(c.evidence)}</p></div>
+    <div class="votes">
+      <button class="btn a" id="voteA" aria-label="Side with Agent A (left arrow)">SIDE WITH A<small>◀ key</small></button>
+      <button class="btn b" id="voteB" aria-label="Side with Agent B (right arrow)">SIDE WITH B<small>key ▶</small></button>
+    </div>
+    <div class="jury" id="jury">
+      ${MODELS.map((m,i)=>valHTML(m,i,'v'+i)).join('')}
+      <div class="val">${ROBOT('#34D399')}<span class="lamp you" id="lampYou" aria-label="Your vote">?</span><span>You</span></div>
+    </div>`,'case');
+  // reorder: svg above lamp for readability handled in valHTML; "you" mirrors it
+  $('#voteA').onclick=()=>castVote('A');
+  $('#voteB').onclick=()=>castVote('B');
+  if(!DEMO)startTimer();
+}
+function valHTML(name,i,id,cidx=i){
+  return `<div class="val">${ROBOT(ROBOT_COLORS[cidx])}<span class="lamp" id="${id}" aria-label="${name} vote pending">?</span><span>${name}</span></div>`;
+}
+function startTimer(){
+  clearInterval(S.timer);S.t0=performance.now();
+  const box=$('#timer'),bar=$('.bar i',box),num=$('b',box),pb=$('.bar',box);
+  S.timer=setInterval(()=>{
+    const left=Math.max(0,TIME-(performance.now()-S.t0)/1000);
+    bar.style.width=(left/TIME*100)+'%';num.textContent=Math.ceil(left)+'s';pb.setAttribute('aria-valuenow',Math.ceil(left));
+    box.classList.toggle('low',left<=5);
+    if(left<=0){clearInterval(S.timer);castVote(null)}
+  },100);
+}
+async function castVote(v){
+  if(S.phase!=='voting')return;
+  S.phase='reveal';clearInterval(S.timer);S.vote=v;SFX.vote();
+  $$('.votes .btn').forEach(b=>b.disabled=true);
+  const you=$('#lampYou');
+  if(v){you.textContent=v;you.className='lamp you on '+v;you.setAttribute('aria-label','Your vote: '+v)}
+  else{you.textContent='–';you.setAttribute('aria-label','You did not vote')}
+  const c=S.cur,gap=REDUCED?REDUCED_MS:LAMP_MS;
+  await sleep(gap);
+  for(let i=0;i<3;i++){await lamp('#v'+i,c.validators[i],MODELS[i]);await sleep(gap)}
+  verdict();
+}
+async function lamp(sel,vote,name){
+  const l=$(sel);if(!l)return;
+  l.textContent=vote;l.className='lamp on '+vote;l.setAttribute('aria-label',name+' voted '+vote);SFX.lamp();
+}
+function count(arr){return{A:arr.filter(x=>x==='A').length,B:arr.filter(x=>x==='B').length}}
+function decide(playerVote,vals,extra=[]){
+  const all=[...vals,...extra,...(playerVote?[playerVote]:[])],t=count(all);
+  const base=count(vals);
+  let tie=false,win;
+  if(t.A>t.B)win='A';else if(t.B>t.A)win='B';else{tie=true;win=base.A>base.B?'A':'B'}
+  return{win,t,tie};
+}
+function applyResult(win){return}
+function verdict(){
+  const c=S.cur,d=decide(S.vote,c.validators);S.verdict=d;S.phase='verdict';
+  const split=!c.validators.every(v=>v===c.validators[0]);
+  let hit=S.vote&&d.win===S.vote,res,sticker,bad=!hit;
+  if(hit){
+    S.streak++;S.longest=Math.max(S.longest,S.streak);S.hits++;
+    const m=mult(S.streak),r=1*m;S.gen+=r;S.results[S.i]='hit';
+    res=`You matched the majority. +${r} GEN${m>1?` (x${m} streak)`:''}. Streak: ${S.streak}.`;
+    sticker=S.streak>=3?'stonks-up':'love';SFX.win();coins();
+  }else{
+    S.streak=0;S.gen=Math.max(0,S.gen-1);S.results[S.i]='miss';
+    res=(S.vote?`You were in the minority. -1 GEN. Streak reset.`:`Time ran out. No vote counts as a miss. -1 GEN.`);
+    sticker='stonks-down';SFX.lose();
+  }
+  hud();shake();
+  const canAppeal=!S.appealUsed&&S.vote&&!hit&&S.gen>=1;
+  const noteAppeal=!S.appealUsed&&S.vote&&!hit&&S.gen<1?'Not enough GEN to appeal (costs 1).':'';
+  const last=S.i>=TOTAL-1;
+  const sheet=document.createElement('div');
+  sheet.className='sheet'+(bad?' bad':'');sheet.id='sheet';sheet.setAttribute('role','status');
+  sheet.innerHTML=`
+    <div class="vhead"><img id="vimg" src="${ASSETS[sticker]}" alt="Mochi reacts: ${bad?'not impressed':'happy'}">
+      <div><div class="banner" id="banner">VERDICT: <span>SIDE ${d.win} WINS</span></div>
+      <div class="tally" id="tally">${tallyText(d)}${split?' <span class="tag">Split jury</span>':''}</div></div></div>
+    <div class="res" id="res">${res}</div>
+    <div class="why" id="why">${esc(c.explanation)}</div>
+    <div class="appealrow" id="arow" hidden></div>
+    <div class="note" id="anote">${canAppeal?'Appeals bring in more validators, like on GenLayer. Cost: 1 GEN. Win it back: +3 GEN.':noteAppeal}</div>
+    <div class="row">${canAppeal?'<button class="btn gold" id="appealBtn" aria-label="Appeal the verdict for 1 GEN (key A)">APPEAL -1 GEN</button>':''}
+      <button class="btn" id="contBtn" aria-label="${last?'See results':'Next case'} (Enter)">${last?'RESULTS ▶':'NEXT CASE ▶'}</button></div>`;
+  stage.firstElementChild.appendChild(sheet);
+  $('#contBtn').onclick=next;
+  if(canAppeal)$('#appealBtn').onclick=appeal;
+  setTimeout(()=>{try{$('#contBtn').focus({preventScroll:true})}catch(e){}},50);
+}
+function tallyText(d){return `Votes: A ${d.t.A} – B ${d.t.B}${d.tie?'. 2–2 tie: the jury\'s earlier majority stands (game rule).':''}`}
+async function appeal(){
+  if(S.busy||S.appealUsed||S.phase!=='verdict')return;
+  S.busy=true;S.appealUsed=true;S.phase='appeal';S.gen=Math.max(0,S.gen-1);hud();SFX.vote();
+  const c=S.cur,btn=$('#appealBtn');if(btn)btn.remove();
+  $('#contBtn').disabled=true;
+  $('#anote').textContent='Appeal filed: 3 more validators join, for 7 votes in total.';
+  const row=$('#arow');row.hidden=false;
+  row.innerHTML=APPEAL_MODELS.map((m,i)=>valHTML(m,i,'ap'+i,i+3)).join('');
+  const gap=REDUCED?REDUCED_MS:LAMP_MS;
+  await sleep(gap);
+  for(let i=0;i<3;i++){await lamp('#ap'+i,c.appealVotes[i],APPEAL_MODELS[i]);await sleep(gap)}
+  const d=decide(S.vote,c.validators,c.appealVotes),flip=d.win===S.vote;
+  S.verdict=d;shake();
+  const sheet=$('#sheet');
+  $('#banner').innerHTML=`APPEAL VERDICT: <span>SIDE ${d.win} WINS</span>`;
+  $('#tally').textContent=`Votes (7): A ${d.t.A} – B ${d.t.B}`;
+  if(flip){
+    S.gen+=3;S.hits++;S.streak=1;S.longest=Math.max(S.longest,1);S.results[S.i]='hit';
+    sheet.classList.remove('bad');$('#vimg').src=ASSETS.love;$('#vimg').alt='Mochi reacts: happy';
+    $('#res').textContent='Verdict flipped in your favor! +3 GEN.';SFX.win();coins();
+  }else{
+    sheet.classList.add('bad');$('#vimg').src=ASSETS['stonks-down'];$('#vimg').alt='Mochi reacts: not impressed';
+    $('#res').textContent='Verdict stands. The 1 GEN appeal fee is lost.';SFX.lose();
+  }
+  $('#anote').textContent='Appeals bring in more validators, like on GenLayer.';
+  hud();$('#contBtn').disabled=false;S.phase='verdict';S.busy=false;
+  try{$('#contBtn').focus({preventScroll:true})}catch(e){}
+}
+function next(){
+  if(S.phase!=='verdict'||S.busy)return;
+  if(S.i>=TOTAL-1)return end();
+  S.i++;showCase();
+}
+function rankOf(h){return h>=TOTAL?{r:'Grand Judge',s:'cookie'}:h>=Math.ceil(TOTAL*.75)?{r:'Senior Validator',s:'love'}:h>=Math.ceil(TOTAL*.5)?{r:'Sharp Validator',s:'stonks-up'}:{r:'Rookie Validator',s:'idea'}}
+function end(){
+  S.phase='end';hud();$('#caseChip').hidden=true;
+  const acc=Math.round(S.hits/TOTAL*100),rk=rankOf(S.hits),best=loadBest();
+  const isBest=!best||S.gen>best.gen;if(isBest)saveBest({gen:S.gen,rank:rk.r});
+  const text=`I scored ${S.gen} GEN and ranked ${rk.r} in Mochi's Court`;
+  setScreen(`
+    <img src="${ASSETS[rk.s]}" alt="Mochi sticker for your rank">
+    <div class="rank" id="rank">${rk.r}</div>
+    <div class="stats">
+      <div class="card"><b>${S.gen}</b><span>GEN</span></div>
+      <div class="card"><b>${acc}%</b><span>Accuracy</span></div>
+      <div class="card"><b>${S.longest}</b><span>Best streak</span></div>
+    </div>
+    <p class="fine">${isBest?'New best score!':`Best: ${best.gen} GEN, ${esc(best.rank)}.`} Play money only. Educational simulation.</p>
+    <div class="row"><button class="btn ghost" id="copyBtn" aria-label="Copy my result">COPY MY RESULT</button><button class="btn" id="again" aria-label="Play again (Enter)">PLAY AGAIN</button></div>
+    <div id="copyOut" class="fine" aria-live="polite"></div>`,'end');
+  $('#again').onclick=()=>DEMO?title():startRun();
+  $('#copyBtn').onclick=()=>copyText(text);
+  if(rk.s==='cookie'||S.hits>=TOTAL/2)coins();SFX.win();
+  try{$('#again').focus({preventScroll:true})}catch(e){}
+}
+async function copyText(t){
+  const out=$('#copyOut');
+  try{await navigator.clipboard.writeText(t);out.textContent='Copied: '+t;return}catch(e){}
+  out.innerHTML='<textarea class="copybox" id="cb" readonly rows="2" aria-label="Result text"></textarea>';
+  const ta=$('#cb');ta.value=t;ta.focus();ta.select();
+  try{document.execCommand('copy')}catch(e){}
+  out.insertAdjacentText('afterbegin','Press Ctrl/Cmd+C to copy: ');
+}
+
+/* ============ effects ============ */
+function shake(){if(REDUCED)return;const a=$('#app');a.classList.remove('shake');void a.offsetWidth;a.classList.add('shake');setTimeout(()=>a.classList.remove('shake'),500)}
+function coins(){
+  if(REDUCED)return;
+  for(let i=0;i<14;i++){
+    const d=document.createElement('span');d.className='fall';d.innerHTML=coinHTML();
+    d.style.left=(5+Math.random()*90)+'vw';d.style.animationDelay=(Math.random()*.6)+'s';
+    document.body.appendChild(d);setTimeout(()=>d.remove(),2400);
+  }
+}
+
+/* ============ keyboard ============ */
+addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  if(e.target&&e.target.tagName==='TEXTAREA')return;
+  const k=e.key;
+  if(S.phase==='voting'){
+    if(k==='ArrowLeft'){e.preventDefault();castVote('A')}
+    else if(k==='ArrowRight'){e.preventDefault();castVote('B')}
+  }else if(S.phase==='verdict'){
+    if(k==='Enter'){e.preventDefault();next()}
+    else if(k==='a'||k==='A'){const b=$('#appealBtn');if(b)appeal()}
+  }else if(S.phase==='title'&&k==='Enter'){const b=$('#startBtn');if(b&&document.activeElement===document.body){e.preventDefault();b.click()}}
+});
+
+/* ============ demo mode (?demo=1): scripted ~15s run ============ */
+async function tap(sel){
+  const cur=$('#cursor');let e;
+  for(let i=0;i<60&&!(e=$(sel));i++)await sleep(50);
+  if(!e)return;
+  const r=e.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+  cur.style.transform=`translate(${x}px,${y}px)`;await sleep(480);
+  cur.classList.add('tap');const rp=document.createElement('div');rp.className='ripple';rp.style.left=x+'px';rp.style.top=y+'px';document.body.appendChild(rp);
+  setTimeout(()=>rp.remove(),700);await sleep(160);cur.classList.remove('tap');e.click();
+}
+async function waitFor(fn){for(let i=0;i<200&&!fn();i++)await sleep(50)}
+async function demo(){
+  $('#cursor').style.display='block';
+  await sleep(900);await tap('#startBtn');
+  const plan=[['A',false],['B',false],['B',true]];
+  for(const [side,doAppeal] of plan){
+    await waitFor(()=>$('#voteA')&&!$('#voteA').disabled);await sleep(550);
+    await tap(side==='A'?'#voteA':'#voteB');
+    await waitFor(()=>S.phase==='verdict');await sleep(650);
+    if(doAppeal){await tap('#appealBtn');await waitFor(()=>S.phase==='verdict'&&!S.busy&&/APPEAL VERDICT/.test($('#banner').textContent));await sleep(900)}
+    await tap('#contBtn');
+  }
+  await sleep(1600);
+}
+
+/* ============ boot ============ */
+$('#logo').innerHTML=logoHTML();
+$('#hudCoin').innerHTML=`<span class="in">${logoHTML()}</span>`;
+title();
+if(DEMO)demo();
+</script>
+</body>
+</html>
